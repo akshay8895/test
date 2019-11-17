@@ -1,0 +1,22 @@
+Subject: [PATCH] Fix signal icon is not shown
+
+The flag GSM of signal strength is set as false under OOS, if lower
+layer does not notify signal strength again after in-service, the
+signal level is based on CDMA, so that signal icon is unable to be
+shown.
+
+To fix it, change the preset flag GSM based on phone type.
+
+diff --git a/src/java/com/android/internal/telephony/ServiceStateTracker.java b/src/java/com/android/internal/telephony/ServiceStateTracker.java
+index 6f7d1bacc..20980846a 100755
+--- a/src/java/com/android/internal/telephony/ServiceStateTracker.java
++++ b/src/java/com/android/internal/telephony/ServiceStateTracker.java
+@@ -4146,7 +4146,7 @@ private void updateServiceStateLteEarfcnBoost(ServiceState serviceState, int lte
+      * @return true if the signal strength changed and a notification was sent.
+      */
+     protected boolean onSignalStrengthResult(AsyncResult ar) {
+-        boolean isGsm = false;
++        boolean isGsm = mPhone.isPhoneTypeGsm();
+         int dataRat = mSS.getRilDataRadioTechnology();
+         int voiceRat = mSS.getRilVoiceRadioTechnology();
+ 

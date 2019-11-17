@@ -1,0 +1,33 @@
+Subject: [PATCH] Add Samsung getting signal strength
+
+diff --git a/src/java/com/android/internal/telephony/RIL.java b/src/java/com/android/internal/telephony/RIL.java
+index b845d2614..f14e30fdd 100644
+--- a/src/java/com/android/internal/telephony/RIL.java
++++ b/src/java/com/android/internal/telephony/RIL.java
+@@ -995,7 +995,10 @@ public void getSignalStrength(Message result) {
+             if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+ 
+             try {
+-                radioProxy.getSignalStrength(rr.mSerial);
++                if (mSamsungRadioProxy != null)
++                    mSamsungRadioProxy.secGetSignalStrength(rr.mSerial);
++                else
++                    radioProxy.getSignalStrength(rr.mSerial);
+             } catch (RemoteException | RuntimeException e) {
+                 handleRadioProxyExceptionForRR(rr, "getSignalStrength", e);
+             }
+diff --git a/src/java/com/android/internal/telephony/SamsungRadioResponse.java b/src/java/com/android/internal/telephony/SamsungRadioResponse.java
+index 63e680afb..11f8f23a8 100644
+--- a/src/java/com/android/internal/telephony/SamsungRadioResponse.java
++++ b/src/java/com/android/internal/telephony/SamsungRadioResponse.java
+@@ -625,7 +625,9 @@ public void secSupplyNetworkDepersonalizationResponse(RadioResponseInfo info, in
+     public void secAcceptCallResponse(RadioResponseInfo info) {}
+     public void secDialResponse(RadioResponseInfo info) {}
+     public void secGetCurrentCallsResponse(RadioResponseInfo info, ArrayList<SecCall> calls) {}
+-    public void secGetSignalStrengthResponse(RadioResponseInfo info, SecSignalStrength sigStrength) {}
++    public void secGetSignalStrengthResponse(RadioResponseInfo info, SecSignalStrength sigStrength) {
++        mResponse.getSignalStrengthResponse_1_2(info, sigStrength.base);
++    }
+     public void secGetVoiceRegistrationStateResponse(RadioResponseInfo info, SecVoiceRegStateResult voiceRegResponse) {}
+     public void secGetDataRegistrationStateResponse(RadioResponseInfo info, SecDataRegStateResult dataRegResponse) {}
+     public void secExplicitCallTransferResponse(RadioResponseInfo info) {}
